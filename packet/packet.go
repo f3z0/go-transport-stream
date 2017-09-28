@@ -37,8 +37,8 @@ type AdaptionFieldFlags struct {
 }
 
 type AdaptionFieldOptionalFields struct {
-	PCR *int64
-	OPCR *int64
+	PCR *uint64
+	OPCR *uint64
 	SpliceCountdown *uint8
 	TransportPrivateData *[]byte
 	Extension *AdaptionFieldExtension
@@ -131,25 +131,25 @@ func NewPacket(b []byte) ( *Packet, error) {
 				afef,
 			}
 
-			var pcr *int64 = nil
-			var opcr *int64 = nil
+			var pcr *uint64 = nil
+			var opcr *uint64 = nil
 			var sc *uint8 = nil
 			var tpd *[]byte = nil
 			var ext *AdaptionFieldExtension = nil
 
 			if pcrf {
-				base := r.Int64(33) // PCR base is 33-bits
+				base := r.Uint64(33) // PCR base is 33-bits
 				r.Skip(6)           // 6-bits are reserved
 				ext := r.Uint64(9)  // PCR extension is 9-bits
-				pcr_val := base*300 + int64(ext)
+				pcr_val := base*300 + ext
 				pcr = &pcr_val
 			}
 
 			if opcrf {
-				base := r.Int64(33) // PCR base is 33-bits
+				base := r.Uint64(33) // PCR base is 33-bits
 				r.Skip(6)           // 6-bits are reserved
 				ext := r.Uint64(9)  // PCR extension is 9-bits
-				opcr_val := base*300 + int64(ext)
+				opcr_val := base*300 + ext
 				opcr = &opcr_val
 			}
 
@@ -252,8 +252,8 @@ func NewPacket(b []byte) ( *Packet, error) {
 
 	r.Skip(uint(payloadStart*8)-r.At())
 
-	pl := r.Bytes(188-payloadStart)
-
+	//pl := r.Bytes(188-payloadStart)
+	var pl []byte = nil
 	return &Packet{
 		tei,
 		pusi,
