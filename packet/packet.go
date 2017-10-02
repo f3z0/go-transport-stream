@@ -78,13 +78,19 @@ func truncateString(str string, num int) string {
 }
 
 
-func DecodeTimestamp(ts uint64, clk uint64) (str string) {
-	//var fa int64 = 27000000;
-	var h uint64 = (ts/(clk*60*60));
-	var m uint64 = (ts/(clk*60))-(h*60);
-	var s uint64 = (ts/clk)-(h*3600)-(m*60);
-	var u uint64 = ts-(h*clk*60*60)-(m*clk*60)-(s*clk);
-	return fmt.Sprintf(" %02d:%02d:%02d.%s", h, m, s, truncateString(fmt.Sprintf("%05d", u), 5))
+func DecodeTimestamp(ts uint64, p uint64, fa uint64) (str string) {
+	var (
+		h uint64
+		m uint64
+		s uint64
+		u uint64
+	)
+	ts /= uint64(p) // Convert to milliseconds
+	h = (ts / (fa * 60 * 60))
+	m = (ts / (fa * 60)) - (h * 60)
+	s = (ts / fa) - (h * 3600) - (m * 60)
+	u = ts - (h * fa * 60 * 60) - (m * fa * 60) - (s * fa)
+	return fmt.Sprintf("%02dh%02dm%02ds%dµs", h, m, s, u)
 }
 
 
