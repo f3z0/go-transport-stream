@@ -9,10 +9,13 @@ import (
 
 const SYNC_BYTE_MAGIC = 0x47
 
-type Packet struct {iobit.Reader}
+type Packet struct {
+	iobit.Reader
+	w iobit.Writer
+}
 
 func NewPacket(b []byte) (p *Packet, err error) {
-	p = &Packet{iobit.NewReader(b)}
+	p = &Packet{iobit.NewReader(b), iobit.NewWriter(b)}
 	if p.Byte() != SYNC_BYTE_MAGIC {
 		return nil, errors.New("Invalid TS Packet - Incorrect sync byte.")
 	}
@@ -60,6 +63,15 @@ func (p *Packet) ContinuityCounter() uint8 {
 	p.Skip(28)
 	return p.Uint8(4)
 }
+
+func (p *Packet) SetContinuityCounter(c uint8) {
+	p.Reset()
+	p.w.Reset()
+	p.w.PutUint32(28, p.Uint32(28))
+	p.w.PutUint8(4, c)
+	p.w.Flush()
+}
+
 
 func (p Packet) AdaptionField() *AdaptionField {
 	af := AdaptionField{p.Reader}
